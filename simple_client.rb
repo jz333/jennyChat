@@ -10,8 +10,8 @@ class MyClient
 		@request = send_request
 		@response = listen_response
 
-		#@request.join # will send the request to server
-		#@response.join # will receive response from server
+		@request.join # will send the request to server
+		@response.join # will receive response from server
 	end
 
 	def send_request
@@ -42,19 +42,27 @@ class MyClient
 	end
 
 	def listen_response
-		begin
-			threadResponse = Thread.new do
+		threadResponse = Thread.new do
+			begin
 				loop {
-					# when server crtlC
-					# Thread terminates with exception report)on_exception is true?????????????
-					response = @socket.gets.chomp  # getting msg from server (from other client)
-					puts "#{response}"
+					begin
+						# when server crtlC, will generate error below as @socket is nil
+						# undefined method `chomp' for nil:NilClass (NoMethodError)
+						# catch the exception to gracefully exit
+						response = @socket.gets.chomp  # getting msg from server (from other client)
+						puts "#{response}"
+					rescue NoMethodError => e
+						#puts e.message
+						puts "Server disconnected. Exiting..."
+						exit
+					end
 				}
+			rescue IOError => e
+				#puts e.message  # stream closed in another thread
+				puts "Disconnecting..."
+				# e.backtrace
+				@socket.close
 			end
-		rescue IOError => e
-			puts e.message
-			# e.backtrace
-			@socket.close
 		end
 	end
 

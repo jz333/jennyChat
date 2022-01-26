@@ -34,6 +34,10 @@ class MyServer
 
 				# specify client side so their first prompt input is username
 				# get msg from client side by using connection.gets
+				if connection.eof?   # if client terminated with exception (ctrlC) then eof is true
+					next
+				end
+
 				user_name = connection.gets.chomp.to_sym  # to symbol
 
 				# check if username exists, do not connect if user exists already
