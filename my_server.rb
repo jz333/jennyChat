@@ -24,41 +24,55 @@ class MyServer
 	def run_server
 		loop {                             # server runs forever
 
-			client = @server_socket.accept      # establish client connection, 
-												# wait for a client to connect
+			client = @server_socket.accept      # establish client connection, wait for a client to connect
+
 			Thread.start(client) do |connection|  # open thread for each accepted connection
-			# client.puts will display on client side terminal; when adding thread
-			# loop through each connection (as a client)
-			# so now connection.puts will display on this client side terminal
+				# client.puts will display on client side terminal; when adding thread
+				# loop through each connection (as a client)
+				# so now connection.puts will display on this client side terminal
 
-			# specify client side so their first prompt input is username
-			# get msg from client side by using connection.gets
-			user_name = connection.gets.chomp.to_sym  # to symbol
 
-			# check if username exists, do not connect if user exists already
-			while (@connected_clients[user_name] != nil)
-				connection.puts "This username already exists."
-				connection.puts "Please use different username: "
+				# specify client side so their first prompt input is username
+				# get msg from client side by using connection.gets
 				user_name = connection.gets.chomp.to_sym  # to symbol
+
+				# check if username exists, do not connect if user exists already
+				while (@connected_clients[user_name] != nil)
+					connection.puts "This username already exists."
+					connection.puts "Please use different username: "
+					user_name = connection.gets.chomp.to_sym  # to symbol
+				end
+
+				puts "Connection established #{user_name} => #{connection}"
+
+				# add this client to hash
+				@connected_clients[user_name] = connection
+
+				connection.puts "Connection established successfully #{user_name} => #{connection}"
+				connection.puts "Welcome to the chat room!"
+
+				# announce to other user a new client is joining
+				@connected_clients.keys.each do |client|
+					if client != user_name
+						@connected_clients[client].puts "#{user_name} has joined!"
+					end
+				end
+
+				establish_chat(user_name, connection)  # allow chatting
+
 			end
 
-			puts "Connection established #{user_name} => #{connection}"
-
-			# add this client to hash
-			@connected_clients[user_name] = connection
-
-			connection.puts "Connection established successfully #{user_name} => #{connection}"
-			connection.puts "Welcome to the chat room!"
-
-			establish_chat(user_name, connection)  # allow chatting
-
-			end
-
-		}.join
+		}
 	end
 
 	def establish_chat(user_name, connection)
 		loop {
+
+			if connection.eof?   # if client terminated with exception (ctrlC) then eof is true
+				puts "Connection with #{user_name} lost."
+				@connected_clients.delete(user_name) # delete this user from hash
+				break
+			end
 
 			#msg = $stdin.gets.chomp
 			msg = connection.gets.chomp   # getting msg from other user
@@ -69,6 +83,8 @@ class MyServer
 				end
 				connection.close
 				@connected_clients.delete(user_name) # delete this user from hash
+				puts "Connection with #{user_name} is ended."
+				break   ############# exit the loop
 			
 			else
 

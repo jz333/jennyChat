@@ -10,8 +10,8 @@ class MyClient
 		@request = send_request
 		@response = listen_response
 
-		@request.join # will send the request to server
-		@response.join # will receive response from server
+		#@request.join # will send the request to server
+		#@response.join # will receive response from server
 	end
 
 	def send_request
@@ -45,6 +45,8 @@ class MyClient
 		begin
 			threadResponse = Thread.new do
 				loop {
+					# when server crtlC
+					# Thread terminates with exception report)on_exception is true?????????????
 					response = @socket.gets.chomp  # getting msg from server (from other client)
 					puts "#{response}"
 				}
