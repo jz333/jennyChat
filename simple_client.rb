@@ -10,6 +10,7 @@ class MyClient
 		@request = send_request
 		@response = listen_response
 
+		# join is necessary here!!!!!!!
 		@request.join # will send the request to server
 		@response.join # will receive response from server
 	end
@@ -26,11 +27,6 @@ class MyClient
 					if msg == 'quit'
 						@socket.close
 						break
-						# Thread.kill(threadRequest)
-						# Thread.kill(threadResponse)
-						# # kill all the thread??????
-						# exit  #???????
-						# simple_client.rb:46:in `gets': stream closed in another thread (IOError)
 					end
 				}
 			end
@@ -43,6 +39,7 @@ class MyClient
 
 	def listen_response
 		threadResponse = Thread.new do
+			# use begin rescue outside of the loop to catch stream closed in another thread error!!
 			begin
 				loop {
 					begin
@@ -61,7 +58,7 @@ class MyClient
 				#puts e.message  # stream closed in another thread
 				puts "Disconnecting..."
 				# e.backtrace
-				@socket.close
+				#@socket.close
 			end
 		end
 	end

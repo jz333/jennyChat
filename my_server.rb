@@ -66,7 +66,7 @@ class MyServer
 
 			end
 
-		}
+		}  # no need to join here!
 	end
 
 	def establish_chat(user_name, connection)
