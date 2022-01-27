@@ -7,12 +7,16 @@ require 'socket'
 class MyClient
 	def initialize(socket)
 		@socket = socket
-		@request = send_request
-		@response = listen_response
+		@request = send_request   # start thread 1, will send the request to server
+		@response = listen_response # start thread 2, ceive response from server
 
-		# join is necessary here!!!!!!!
-		@request.join # will send the request to server
-		@response.join # will receive response from server
+		# need to make sure main thread does not exit
+		# you can do this by joining one thread (either one)
+		# or just do a forever loop - but need to handle 'quit' differently
+
+		@request.join # to prevent main thread finish running and exit
+		# after the @request.join, nothing will run here (after the call) if request thread is not finished
+		#@response.join # can join either child thread
 	end
 
 	def send_request

@@ -113,10 +113,9 @@ threadResponse = Thread.new do
   rescue IOError => e
     puts "Disconnecting..."  # handles when client input 'quit'
   end
+end
 ```
-Be sure to join these two threads in the main code (thread) so they get executed.
-Curiously if you don't join the request thread and only join the response thread, it works too.
-Join should be blocking the main thread and will execute the request thread until it's finished - yet it is a loop and will never finish! What happens then? It seems like by calling join on the second thread (response thread) the program will execute thread two in the same time as thread one...
+In order to keep the main thread running while these two child threads are running, we can either running a forever loop after the two Thread.new call and set up some conditions in the loop to exit when server terminates or client inputs 'quit'. We can also use thread's join method to join one of the thread - when calling for example ```threadRequest.join```, the calling thread (parent thread, which is the main thread) will suspend execution, thus prevent the main thread finishing execution and exit the program, and run this threa 'threadRequest'. Because both child threads are running after they are created, and all they do is looping some code - using join on one thread will not change much of what's going on except suspending the main thread and keep the program running and running.
 
 
 
